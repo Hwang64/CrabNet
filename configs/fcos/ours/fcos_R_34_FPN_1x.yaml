@@ -1,0 +1,61 @@
+MODEL:
+  META_ARCHITECTURE: "GeneralizedRCNN"
+  WEIGHT: "catalog://ImageNetPretrained/MSRA/R-50"
+  RPN_ONLY: True
+  FCOS_ON: True
+  BACKBONE:
+    CONV_BODY: "R-101-FPN-RETINANET"
+    CLS_CONV_BODY: "R-34-FPN-RETINANET"
+    REG_CONV_BODY: "R-101-FPN-RETINANET"
+  RESNETS:
+    BACKBONE_OUT_CHANNELS: 256
+    REG_STRIDE_IN_1X1: True
+    REG_NUM_GROUPS: 1
+    REG_WIDTH_PER_GROUP: 64
+    CLS_STRIDE_IN_1X1: True
+    CLS_NUM_GROUPS: 1
+    CLS_WIDTH_PER_GROUP: 64
+    CLS_RES2_OUT_CHANNELS: 64
+    CLS_LIGHT_WEIGHT: True
+  RETINANET:
+    USE_C5: False # FCOS uses P5 instead of C5
+  FCOS:
+    # normalizing the regression targets with FPN strides
+    NORM_REG_TARGETS: True
+    # positioning centerness on the regress branch.
+    # Please refer to https://github.com/tianzhi0549/FCOS/issues/89#issuecomment-516877042
+    CENTERNESS_ON_REG: True
+    # using center sampling and GIoU.
+    # Please refer to https://github.com/yqyao/FCOS_PLUS
+    CENTER_SAMPLING_RADIUS: 1.5
+    IOU_LOSS_TYPE: "giou"
+    # we only use dcn in the last layer of towers
+    USE_DCN_IN_TOWER: True
+DATASETS:
+  TRAIN: ("coco_2017_train",)
+  TEST: ("coco_2017_val",)
+INPUT:
+  MIN_SIZE_TRAIN: (640,800)
+  MAX_SIZE_TRAIN: 1333
+  MIN_SIZE_TEST: 800
+  MAX_SIZE_TEST: 1333
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+SOLVER:
+  BASE_LR: 0.0025
+  WEIGHT_DECAY: 0.0001
+  STEPS: (480000, 640000)
+  MAX_ITER: 720000
+  IMS_PER_BATCH: 4
+  WARMUP_METHOD: "constant"
+TEST:
+  BBOX_AUG:
+    ENABLED: True
+    VOTE: True
+    VOTE_TH: 0.66
+    MERGE_TYPE: "soft-vote"
+    H_FLIP: True
+    SCALES: (400, 500, 600, 640, 700, 900, 1000, 1100, 1200, 1300, 1400, 1800)
+    SCALE_RANGES: [[96, 10000], [96, 10000], [64, 10000], [64, 10000], [64, 10000], [0, 10000], [0, 10000], [0, 256], [0, 256], [0, 192], [0, 192], [0, 96]]
+    MAX_SIZE: 3000
+    SCALE_H_FLIP: True
