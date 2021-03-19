@@ -52,8 +52,8 @@ class Cls_Head(nn.Module):
             cls_label = target.extra_fields['labels'] - 1
             cls_target = torch.zeros(80).to(cls_label.device)
             cls_target = cls_target.scatter(0,cls_label,1).unsqueeze(0)
-            if l==0 :cls_target_0 = cls_target
-            else: cls_targets = torch.cat((cls_target_0, cls_target), dim=0)
+            if l==0 :cls_targets = cls_target
+            else: cls_targets = torch.cat((cls_targets, cls_target), dim=0)
 
         if self.gap == True:
             avg_x = self.avgpool(cls_feature)
@@ -86,9 +86,8 @@ class Cls_Head(nn.Module):
 
         if self.mix == True:
             x = self.fc_mix(gap_x)
-        alpha = 0.5 * (1+np.cos(np.pi*(float(iteration)/float(720000))))
-        if len(targets) == 1: classification_loss = alpha * self.classification_loss_func(x,cls_target_0)
-        if len(targets) == 2: classification_loss = alpha * self.classification_loss_func(x,cls_targets)
+        alpha = 0.5 * (1+np.cos(np.pi*(float(iteration)/float(360000))))
+        classification_loss = alpha * self.classification_loss_func(x,cls_targets)
 
         losses = {"classification_loss": classification_loss}
         return losses
